@@ -45,7 +45,7 @@ class AddMenuItemForm extends Component {
 			this.setState({error: "Please provide a category"});
 		}
 		else {
-			let data = {name: name, category: category, price: price};
+			let data = {name: name, category: category.category_name, price: price};
 			send("POST", "/api/menuItems", data, function(err, res) {
 				if(err) console.log(err);
 				else{
