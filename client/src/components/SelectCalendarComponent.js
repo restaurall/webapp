@@ -63,7 +63,7 @@ class SelectCalendarComponent extends React.Component {
 		return (
 			<div className="calendarContainer">
 				<h3>{this.state.name}</h3>
-				<select value={this.state.c_id} onChange={this.handleChange} className="selectInputs" name="c_id"> 
+				<select value={this.state.c_id} onChange={this.handleChange} className="selectInputs inputs" name="c_id"> 
 					<option value="-1">--Please Select A Calendar--</option>
 					{optionsRes}
 				</select>

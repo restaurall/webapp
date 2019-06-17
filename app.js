@@ -245,6 +245,19 @@ app.get("/api/categories/", isAuthenticated, function(req, res){
 	});
 });
 
+app.post("/api/categories/", isAuthenticated, function(req, res){
+
+	let query = "INSERT INTO menu_categories (category_name, color) values (?, ?)";
+	connection.query(query, [req.body.name, req.body.colour], function(err, result, fields){
+		if(err) {
+			res.status(500).end(err.toString());
+		}
+		else {
+			res.json(result);
+		}
+	});
+});
+
 app.get("/api/orders/:paid/", isAuthenticated, function(req, res){
 	let query = "SELECT * FROM `orders` WHERE `payed` = " + req.params.paid;
 

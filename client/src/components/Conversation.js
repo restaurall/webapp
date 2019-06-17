@@ -56,7 +56,7 @@ class Conversation extends Component {
 						<div className="conversation">
 							{messages}
 						</div>
-						<textarea className="textInputs" placeholder="Write a message" name="newMessage" rows="1" onChange={this.handleChange} value={this.state.newMessage}></textarea>
+						<textarea className="textInputs inputs" placeholder="Write a message" name="newMessage" rows="1" onChange={this.handleChange} value={this.state.newMessage}></textarea>
 						<input type="submit" className="btn" value="Send" onClick={this.insertMessage} />
 					</div>
 				);

@@ -36,8 +36,8 @@ class AddCalendarComponent extends Component {
 			<div className="AddFormBody">
 			<h1>Add Calendar</h1>
 			<form className="addForm" onSubmit={this.handleSubmit}>
-			<input className="textInputs" type="text" placeholder="Name" value={this.state.name} onChange={this.handleChange} name="name" />
-			<input className="textInputs" type="date" value={this.state.startDate} onChange={this.handleChange} name="startDate" />
+			<input className="textInputs inputs" type="text" placeholder="Name" value={this.state.name} onChange={this.handleChange} name="name" />
+			<input className="textInputs inputs" type="date" value={this.state.startDate} onChange={this.handleChange} name="startDate" />
 			<input className="btn" type="submit" />
 			</form>
 			</div>
