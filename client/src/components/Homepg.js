@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import '../style/login.css'
 import {getUserName} from '../HelperFunctions'
 
 class HomePg extends Component {

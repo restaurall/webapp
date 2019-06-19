@@ -30,7 +30,7 @@
   font-size: 20px;
 }
 
-input[type="text"], input[type="password"] {
+.authenticate_form input[type="text"], input[type="password"] {
   width: 100%;
   margin: 8px 0;
   font-family: Arial, Helvetica, sans-serif;

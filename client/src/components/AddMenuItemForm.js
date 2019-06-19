@@ -12,12 +12,13 @@ class AddMenuItemForm extends Component {
 			price: "",
 			categories: [],
 			error: "",
-			addCategory: false
+			showCategoryForm: false
 		};
 
 		this.handleChange = this.handleChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.addCategory = this.addCategory.bind(this);
+		this.showNewCategoryForm = this.showNewCategoryForm.bind(this);
+		this.newCategoryHandler = this.newCategoryHandler.bind(this); 
 
 	}
 
@@ -33,6 +34,12 @@ class AddMenuItemForm extends Component {
 	    }.bind(this));
 	}
 
+	newCategoryHandler(newCategory){
+		let categories = this.state.categories;
+		categories.push(newCategory);
+		this.setState({categories: categories});
+	}
+
 	handleChange(event){
 		let {name, value} = event.target;
 		this.setState({[name]: value});
@@ -45,7 +52,7 @@ class AddMenuItemForm extends Component {
 			this.setState({error: "Please provide a category"});
 		}
 		else {
-			let data = {name: name, category: category.category_name, price: price};
+			let data = {name: name, category: category, price: price};
 			send("POST", "/api/menuItems", data, function(err, res) {
 				if(err) console.log(err);
 				else{
@@ -55,32 +62,31 @@ class AddMenuItemForm extends Component {
 		}
 	}
 
-	addCategory(){
-		this.setState({addCategory: true});
+	showNewCategoryForm(event){
+		event.preventDefault();
+		let showCategoryForm = this.state.showCategoryForm;
+		this.setState({showCategoryForm: !showCategoryForm});
 	}
 
 	render(){
 		let categories = this.state.categories;
 		let options = [];
 		let addCategory = [];
-		if(categories !== []){
-			let defaultOption = <option value="">Select a category</option>
-			options.push(defaultOption);
+		if(categories.length !== 0){
 			options = categories.map(function(c){
 				return <option key={c.category_name} value={c.category_name}>{c.category_name}</option>
 			});
+			let defaultOption = <option key='select category' value=''>Select a category</option>
+			options.unshift(defaultOption);
 		}
 		else {
-			let emptyOption = <option value="">No categories available</option>
+			let emptyOption = <option key="none available" value="">No categories available</option>
 			options.push(emptyOption);
 		}
 
-		// if(this.state.addCategory){
-		// 	addCategory = <AddNewCategory />;
-		// }
-
-		// <button className="addCategoryButton" type="submit" onClick={this.addCategory}>+</button>
-		// {addCategory}
+		if(this.state.showCategoryForm){
+			addCategory = <AddNewCategory newCategoryHandler={this.newCategoryHandler} />;
+		}
 
 		return (
 			<div className="AddFormBody">
@@ -90,6 +96,8 @@ class AddMenuItemForm extends Component {
 			<select className="categoryInput inputs" name="category" value={this.state.category} onChange={this.handleChange} >
 				{options}
 			</select>
+			<button className="addCategoryButton" onClick={this.showNewCategoryForm}>+</button>
+			{addCategory}
 			<input className="textInputs inputs" type="number" min="1" step="any" placeholder="Price" value={this.state.price} onChange={this.handleChange} name="price" />
 			<input className="btn" type="submit" />
 			</form>

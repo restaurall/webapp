@@ -30,6 +30,19 @@
 	display: block;
 }
 
+.categoryFields {
+	margin: 0px 10px 0px 10px;
+	display: inline-block;
+}
+
+.categoryName {
+	
+}
+
+.categoryColour {
+	padding: 0px;
+}
+
 .categoryInput {
 	width: 88%;
 }
@@ -65,4 +78,8 @@
 	line-height: 8px;
 	border-radius: 50%;
 	background-color: #008CBA; /* Blue */
+}
+
+.submitCategory {
+	margin: 10px;
 }
