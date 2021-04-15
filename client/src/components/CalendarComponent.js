@@ -1,36 +1,30 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import moment from 'moment';
 import WeekCalendar from 'react-week-calendar';
 import {send} from '../HelperFunctions';
 const io = require('socket.io-client');
 
-class CalendarComponent extends React.Component {
+//TODO: bug - calendar updated only on refresh
+const CalendarComponent = ({calendar}) => {
 
-	constructor(props) {
-		super(props);
-		this.socket = io();
-		let sI = this.props.calendar.selected_intervals == null ? [] : JSON.parse(this.props.calendar.selected_intervals);
+	const socket = io();
+
+	const [lastUid, setLastUid] = useState(calendar.uid);
+	const [selectedIntervals, setSelectedIntervals] = useState(() => {
+		let sI = calendar.selected_intervals == null ? [] : JSON.parse(calendar.selected_intervals);
 		if (sI.length > 0) {
 			for(let i = 0; i < sI.length; i++){
 				sI[i].start = moment(sI[i].start);
 				sI[i].end = moment(sI[i].end);
 			}
 		}
-
-		//TODO clean up unused properties
-		this.state = {
-			lastUid: this.props.calendar.uid,
-			selectedIntervals: sI,
-			start_date: this.props.calendar.start_date,
-			calendar: this.props.calendar,
-			c_id: this.props.calendar.c_id,
-			name: this.props.calendar.name
-		};
-
-		this.updateCal = this.updateCal.bind(this)
-	}
-
-	updateCal(cal){
+		return sI;			
+	});
+	const [start_date, setStart_date] = useState(calendar.start_date);
+	const [c_id, setC_id] = useState(calendar.c_id);
+	const [name, setName] = useState(calendar.name);
+	
+	const updateCal = (cal) => {
 		let sI = JSON.parse(cal.selected_intervals);
 		if (sI.length > 0) {
 			for(let i = 0; i < sI.length; i++){
@@ -38,98 +32,84 @@ class CalendarComponent extends React.Component {
 				sI[i].end = moment(sI[i].end);
 			}
 		}
-		this.setState({
-			lastUid: cal.uid,
-			selectedIntervals: sI,
-			start_date: cal.start_date,
-			c_id: cal.c_id,
-			name: cal.name
+		setLastUid(cal.uid);
+		setSelectedIntervals(sI);
+		setStart_date(cal.start_date);
+		setName(cal.name);
+		setC_id(cal.c_id);
+	}
+	
+	useEffect(() => {
+		socket.on("calendarUpdated", updateCal);
+		return () => socket.close();
+	},[]);
+
+	const updateDb = (selectedI) => {
+		let new_start_date = moment(start_date).format("YYYY-MM-D")
+		let data = {name, start_date: new_start_date.toString(), c_id, uid: lastUid, selected_intervals: JSON.stringify(selectedI)};
+		//console.log(JSON.stringify(this.state.selectedIntervals));
+		send("PATCH", "/api/calendars/" + c_id.toString() + "/", data, function(err, res) {
+			if(err) console.log(err);
+			else{
+				socket.emit("calendarUpdated", data);
+			}
 		});
 	}
 
-	componentDidMount() {
-		this.socket.on("calendarUpdated", this.updateCal);
-	}
-
-	componentWillUnmount(){
-		this.socket.close();
-	}
-
-	updateDb(selectedI){
-		let start_date = this.state.start_date;
-			start_date = moment(start_date).format("YYYY-MM-D")
-			let data = {name: this.state.name, start_date: start_date.toString(), c_id: this.state.c_id, uid: this.state.lastUid, selected_intervals: JSON.stringify(selectedI)};
-			//console.log(JSON.stringify(this.state.selectedIntervals));
-			send("PATCH", "/api/calendars/" + this.state.c_id.toString() + "/", data, function(err, res) {
-				if(err) console.log(err);
-				else{
-					this.setState({calendar: res});
-					this.socket.emit("calendarUpdated", data);
-				}
-			}.bind(this));
-	}
-	
-
-	handleEventRemove = (event) => {
-		const {selectedIntervals} = this.state;
-		const index = selectedIntervals.findIndex((interval) => interval.uid === event.uid);
+	const handleEventRemove = (event) => {
+		let newIntervals = selectedIntervals;
+		const index = newIntervals.findIndex((interval) => interval.uid === event.uid);
 		if (index > -1) {
-			selectedIntervals.splice(index, 1);
+			newIntervals.splice(index, 1);
 
-			this.updateDb(selectedIntervals);
+			updateDb(newIntervals);
 
-			this.setState({selectedIntervals});
+			setSelectedIntervals(newIntervals);
 		}
 	}
 
-	handleEventUpdate = (event) => {
-		const {selectedIntervals} = this.state;
-		const index = selectedIntervals.findIndex((interval) => interval.uid === event.uid);
+	const handleEventUpdate = (event) => {
+		let newIntervals = selectedIntervals;
+		const index = newIntervals.findIndex((interval) => interval.uid === event.uid);
 		if (index > -1) {
-			selectedIntervals[index] = event;
-			this.updateDb(selectedIntervals);
-			this.setState({selectedIntervals});
+			newIntervals[index] = event;
+			updateDb(newIntervals);
+			setSelectedIntervals(newIntervals);
 		}
 	}
 
-	handleSelect = (newIntervals) => {
-		const {lastUid, selectedIntervals} = this.state;
-		const intervals = newIntervals.map( (interval, index) => {
+	const handleSelect = (newIntervals) => {
+		const intervals = newIntervals.map((interval, index) => {
 			return {
 				...interval,
 				uid: lastUid + index
 			}
 		});
 
-		this.setState({
-			selectedIntervals: selectedIntervals.concat(intervals),
-			lastUid: lastUid + newIntervals.length
-		}, () => this.updateDb(selectedIntervals.concat(intervals)));
-
-		
-
+		setSelectedIntervals(prevSelectedIntervals => prevSelectedIntervals.concat(intervals));
+		setLastUid(prevLastUid => prevLastUid + newIntervals.length);
+		updateDb(selectedIntervals.concat(intervals));
 	}
 
-	render() {
-		let calendarRes = null;
-		//console.log(this.state.selectedIntervals);
-		if(this.state.c_id > -1) {
-			calendarRes = (<WeekCalendar
-				firstDay = {moment(this.state.start_date)}
+	if(c_id > -1) {
+		return(
+			<WeekCalendar
+				firstDay = {moment(start_date)}
 				startTime = {moment({h: 9, m: 0})}
 				endTime = {moment({h: 15, m: 30})}
 				numberOfDays= {7}
-				selectedIntervals = {this.state.selectedIntervals}
-				onIntervalSelect = {this.handleSelect}
-				onIntervalUpdate = {this.handleEventUpdate}
-				onIntervalRemove = {this.handleEventRemove}
-				/>);
-		}
+				selectedIntervals = {selectedIntervals}
+				onIntervalSelect = {handleSelect}
+				onIntervalUpdate = {handleEventUpdate}
+				onIntervalRemove = {handleEventRemove}
+			/>
+		);
+	} else {
+		//TODO: else return something for no selected calendar
 		return (
-				<div>
-					{calendarRes}
-				</div>
-			)
+			<>
+			</>
+		);
 	}
 }
 

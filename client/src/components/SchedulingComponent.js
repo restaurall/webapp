@@ -1,17 +1,10 @@
-import React, {Component} from 'react';
+import React from 'react';
 import SelectCalendarComponent from './SelectCalendarComponent';
 
-class SchedulingComponent extends Component {
-	constructor(props){
-		super(props);
-		this.state = {};
-	}
-
-	render(){
-		return (
-				<SelectCalendarComponent />
-			);
-	}
+const SchedulingComponent = () => {
+	return (
+		<SelectCalendarComponent />
+	);
 }
 
 export default SchedulingComponent

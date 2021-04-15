@@ -1,48 +1,46 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import {send} from '../HelperFunctions';
 
-class AddCalendarComponent extends Component {
-	constructor(){
-		super();
-		this.state = {
-			name: "",
-			startDate: ""
-		};
+const AddCalendarComponent = () => {
+	
+	const [name, setName] = useState('');
+	const [startDate, setStartDate] = useState('');
 
-		this.handleChange = this.handleChange.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
-
-	}
-
-	handleChange(event){
-		let {name, value} = event.target;
-		this.setState({[name]: value});
-	}
-
-	handleSubmit(event){
+	const handleSubmit = (event) => {
 		event.preventDefault();
-		let {name, startDate} = this.state;
-		let data = {name: name, startDate: startDate};
+		let data = {name, startDate};
 		send("POST", "/api/calendars", data, function(err, res) {
 			if(err) console.log(err);
 			else{
-				this.setState({name: "", startDate: ""});
+				setName('');
+				setStartDate('');
 			}
-		}.bind(this));
+		});
 	}
-
-	render(){
-		return (
-			<div className="AddFormBody">
+	
+	return (
+		<div className="AddFormBody">
 			<h1>Add Calendar</h1>
-			<form className="addForm" onSubmit={this.handleSubmit}>
-			<input className="textInputs inputs" type="text" placeholder="Name" value={this.state.name} onChange={this.handleChange} name="name" />
-			<input className="textInputs inputs" type="date" value={this.state.startDate} onChange={this.handleChange} name="startDate" />
-			<input className="btn" type="submit" />
+			<form className="addForm" onSubmit={handleSubmit}>
+				<input 
+					className="textInputs inputs" 
+					type="text" 
+					placeholder="Name" 
+					value={name} 
+					onChange={(e) => setName(e.target.value)} 
+					name="name" 
+				/>
+				<input 
+					className="textInputs inputs" 
+					type="date" 
+					value={startDate} 
+					onChange={(e) => setStartDate(e.target.value)} 
+					name="startDate" 
+				/>
+				<input className="btn" type="submit" />
 			</form>
-			</div>
-			);
-	}
+		</div>
+	);
 }
 
 export default AddCalendarComponent

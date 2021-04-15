@@ -23,7 +23,7 @@ let io = require('socket.io')(http);
 // let connection = mysql.createConnection({
 //   host     : 'localhost',
 //   user     : 'root',
-//   password : 'test123',
+//   password : '465948224',
 //   database : 'restaurall',
 // });
 
@@ -55,11 +55,18 @@ function initializeConnection(config) {
     return connection;
 }
 
-connection = initializeConnection({
-    host     : 'us-cdbr-iron-east-02.cleardb.net',
-    user     : 'b48689093dca92',
-    password : '16192734',
-    database : 'heroku_04e29547e248034',
+// connection = initializeConnection({
+//     host     : 'us-cdbr-iron-east-02.cleardb.net',
+//     user     : 'b48689093dca92',
+//     password : '16192734',
+//     database : 'heroku_04e29547e248034',
+// });
+
+connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : '465948224',
+  database : 'restaurall',
 });
 
 app.use(session({
@@ -130,7 +137,7 @@ app.post('/signup/', checkUsername, checkPassword, function (req, res, next) {
       	//Initialize cookie
 		res.setHeader('Set-Cookie', cookie.serialize('username', username, {
 			path: '/',
-			maxAge: 60*60*24*7
+			// maxAge: 60*60*24*7
 		}));
 
 		//store username into session
@@ -163,7 +170,7 @@ app.post('/signin/', checkUsername, checkPassword, function (req, res, next) {
       		//Initialize cookie
 			res.setHeader('Set-Cookie', cookie.serialize('username', username, {
 				path: '/',
-				maxAge: 60*60*24*7
+				// maxAge: 60*60*24*7
 			}));
 			//initialize session
       		req.session.username = username;

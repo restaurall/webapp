@@ -1,76 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import WeekCalendar from 'react-week-calendar';
 import {send} from '../HelperFunctions';
 import CalendarComponent from './CalendarComponent';
 
-class SelectCalendarComponent extends React.Component {
+const SelectCalendarComponent = () => {
 
-	constructor() {
-		super();
+	const [options, setOptions] = useState([]);
+	const [calendar, setCalendar] = useState({});
+	const [calendars, setCalendars] = useState([]);
+	const [c_id, setC_id] = useState(-1);
 
-		this.state = {
-			//lastUid: 1,
-			//selectedIntervals: [],
-			calendar: {},
-			c_id: -1,
-			calendars: []
-		};
-
-		this.handleChange = this.handleChange.bind(this);
-	}
-
-	componentDidMount() {
+	useEffect(() => {
 		send("GET", "/api/calendars/?limit=" + "5", {}, function(err, res) {
 			if(err) console.log(err);
-			else{
-				this.setState({
-					calendars: res,
-					c_id: (res.length > 0) ? res[0].c_id : this.state.c_id,
-					calendar: (res.length > 0) ? res[0] : this.state.calendar
-				});
+			else {
+				setCalendars(res);
+				if (res.length > 0){
+				 	setCalendar(res[0]);
+					setC_id(res[0].c_id);
+				}
 			}
-		}.bind(this));
-	}
+		});
+	}, []);
 
-	handleChange(event){
+	useEffect(() => {
+		for(let i = 0; i < calendars.length; i++){
+			let c = calendars[i];
+			setOptions((prevOptions) => [...prevOptions, <option key={c.c_id} value={c.c_id}>{c.name}</option>]);
+		}
+	}, [calendars]);
+
+	const handleChange = (event) => {
 		let {name, value} = event.target;
 		if(name === "c_id" && value > -1){
 			//We have to update c_id and calendar
 			let newCal;
-			for(let i = 0; i < this.state.calendars.length; i++){
-				if (this.state.calendars[i].c_id == value){
-					newCal = this.state.calendars[i];
+			for(let i = 0; i < calendars.length; i++){
+				if (calendars[i].c_id == value){
+					newCal = calendars[i];
 				}
 			}
-			this.setState({[name]: value, calendar: newCal});
+			setC_id(value);
+			setCalendar(newCal);
 		}
-	}
+	}	
 
-	render() {
-		let calendarRes = null;
-		let optionsRes = [];
-		if(this.state.c_id > -1) {
-			calendarRes = (
-					<CalendarComponent key={this.state.c_id} calendar={this.state.calendar}/>
-				);
-
-			for(let i = 0; i < this.state.calendars.length; i++){
-				let c = this.state.calendars[i];
-				optionsRes.push(<option key={c.c_id} value={c.c_id}>{c.name}</option>)
-			}
-		}
-		//console.log(this.state.calendar);
-		return (
-			<div className="calendarContainer">
-				<h3>{this.state.name}</h3>
-				<select value={this.state.c_id} onChange={this.handleChange} className="selectInputs inputs" name="c_id"> 
-					<option value="-1">--Please Select A Calendar--</option>
-					{optionsRes}
-				</select>
-				{calendarRes}
-			</div>
-			)
-	}
+	return (
+		<div className="calendarContainer">
+			{/* <h3>{name}</h3> */}
+			<select value={c_id} onChange={handleChange} className="selectInputs inputs" name="c_id"> 
+				<option value="-1">--Please Select A Calendar--</option>
+				{options}
+			</select>
+			{/*TODO: load based on calendar not c_id?*/}
+			{(c_id > -1) && <CalendarComponent key={c_id} calendar={calendar}/>}
+		</div>
+	);
 }
 
 export default SelectCalendarComponent;
