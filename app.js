@@ -130,7 +130,7 @@ app.post('/signup/', checkUsername, checkPassword, function (req, res, next) {
       	//Initialize cookie
 		res.setHeader('Set-Cookie', cookie.serialize('username', username, {
 			path: '/',
-			maxAge: 60*60*24*7
+			//maxAge: 60*60*24*7
 		}));
 
 		//store username into session
@@ -163,7 +163,7 @@ app.post('/signin/', checkUsername, checkPassword, function (req, res, next) {
       		//Initialize cookie
 			res.setHeader('Set-Cookie', cookie.serialize('username', username, {
 				path: '/',
-				maxAge: 60*60*24*7
+				//maxAge: 60*60*24*7
 			}));
 			//initialize session
       		req.session.username = username;
@@ -178,7 +178,7 @@ app.post('/signin/', checkUsername, checkPassword, function (req, res, next) {
 });
 
 app.get("/signout/", isAuthenticated, function(req, res){
-	req.session.username = "";
+	req.session.destroy();
 	res.setHeader("Set-Cookie", cookie.serialize('username', '', {
 		path : '/', 
         maxAge: 60 * 60 * 24 * 7
