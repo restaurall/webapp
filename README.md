@@ -1,7 +1,7 @@
 # Project Title: RestaurAll
 #### Team Members: Faisal Mohammed, Jun Zhang, Shengji Lin
 
-### Website URL: https://restaurall.herokuapp.com/
+### Website URL: https://restaur-all.herokuapp.com/
 
 ### Youtube URL: https://youtu.be/APAG0cN_HHw
 
