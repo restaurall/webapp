@@ -184,7 +184,8 @@ app.post('/signin/', checkUsername, checkPassword, function (req, res, next) {
 
 });
 
-app.get("/signout/", isAuthenticated, function(req, res){
+// removed authentication for signout for dev perposes
+app.get("/signout/", function(req, res){
 	req.session.username = "";
 	res.setHeader("Set-Cookie", cookie.serialize('username', '', {
 		path : '/', 

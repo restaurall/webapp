@@ -1,43 +1,45 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import {send} from '../HelperFunctions';
 
-class AddNewCategory extends Component {
-	constructor(props){
-		super(props);
-		this.state = {name: "", colour: "#000000"};
-		this.handleUpdate = this.handleUpdate.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
-	}
+const AddNewCategory = ({newCategoryHandler}) => {
 
-	handleUpdate(event) {
-		let {name, value} = event.target;
-		this.setState({[name]: value});
-	}
+	const [name, setName] = useState('');
+	const [colour, setColour] = useState('#000000');
 
-	handleSubmit(event) {
+	const handleSubmit = (event) => {
 		event.preventDefault();
-		let data = {name: this.state.name, colour: this.state.colour};
+		let data = {name, colour};
 		send("POST", "/api/categories/", data, function(err, res) {
 			if(err) console.log(err);
 			else{
-				this.props.newCategoryHandler({category_name: this.state.name, color: this.state.colour});
-				this.setState({name: "", colour: "#000000"});
+				newCategoryHandler({category_name: name, color: colour});
+				setName('')
+				setColour('#000000')
 			}
-		}.bind(this));
+		});
 	}
 
-	render() {
-		return (
-				<div>
-				<input className="categoryFields categoryName inputs" type="text" placeholder="Category Name" value={this.state.name} onChange={this.handleUpdate} name="name" />
-				<input className="categoryFields categoryColour inputs" type="color" placeholder="Color" value={this.state.colour} onChange={this.handleUpdate} name="colour" />
-				<button className="submitCategory" onClick={this.handleSubmit}>Add</button>
-				</div>
-
-			);
-	}
-
-
+	return (
+		<div>
+			<input 
+				className="categoryFields categoryName inputs" 
+				type="text" 
+				placeholder="Category Name" 
+				value={name} 
+				onChange={(e) => setName(e.target.value)} 
+				name="name" 
+			/>
+			<input 
+				className="categoryFields categoryColour inputs" 
+				type="color" 
+				placeholder="Color" 
+				value={colour} 
+				onChange={(e) => setColour(e.target.value)} 
+				name="colour" 
+			/>
+			<button className="submitCategory" onClick={handleSubmit}>Add</button>
+		</div>
+	);	
 }
 
 export default AddNewCategory;
