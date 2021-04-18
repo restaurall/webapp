@@ -1,73 +1,130 @@
-import React, {Component} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {send, getUserName} from '../HelperFunctions';
 
-class Conversation extends Component {
-	constructor(){
-		super();
-		// this.socket = io();
-		this.state = {
-			newMessage: ""
-		};
+const Conversation = ({userId, socket, messages}) => {
 
-		this.handleChange = this.handleChange.bind(this);
-		this.insertMessage = this.insertMessage.bind(this);
-	}
+	const [newMessage, setNewMessage] = useState('');
 
-	componentDidUpdate() {
+	const messagesDivRef = useRef({});
+
+	useEffect(() => {
 		//show bottom of message div
-		let messagesDiv = document.getElementsByClassName('conversation');
-		if (messagesDiv.length > 0){
-			messagesDiv[0].scrollTop = messagesDiv[0].scrollHeight;
-		}
-	}
+		messagesDivRef.current.scrollTop = messagesDivRef.current.scrollHeight;
+	}, [messagesDivRef.current, messages]);
 
-	handleChange(event){
-		let {name, value} = event.target;
-		this.setState({[name]: value});
-	}
-
-	insertMessage(event){
+	const insertMessage = (event) => {
 		event.preventDefault();
-		let data = {recipient: this.props.userId, message: this.state.newMessage, sender: getUserName()};
+		let data = {recipient: userId, message: newMessage, sender: getUserName()};
 		send("POST", "/api/messages", data, function(err, res) {
 			if(err) console.log(err);
 			else{
-				this.props.socket.emit("messagesUpdate", data);
+				socket.emit("messagesUpdate", data);
+				setNewMessage('');
 			}
-		}.bind(this));
-		this.setState({newMessage: ""});
+		});
 	}
 
-	render(){
-		let message = <h3>Select Contact</h3>;
-		let userId = this.props.userId;
-		if (userId != ""){
-			let messages = this.props.messages.map(function(m, index){
-				let direction = m.recipient === userId ? "right" : "left";
-				let currMessage = (
-						<div key={index} className={"message " + direction}>{m.message}</div>
-					);
-				return currMessage;
-			});
-
-			//display the messages and an input to send a new message
-			message = (
-					<div className="conversationContainer">
-						<div className="conversation">
-							{messages}
-						</div>
-						<textarea className="textInputs inputs" placeholder="Write a message" name="newMessage" rows="1" onChange={this.handleChange} value={this.state.newMessage}></textarea>
-						<input type="submit" className="btn" value="Send" onClick={this.insertMessage} />
-					</div>
-				);
-		}
+	if(userId) {
 		return (
-					<div className="conversations">
-						{message}
+			<div className="conversations">
+				<div className="conversationContainer">
+					<div className="conversation" ref={messagesDivRef}>
+						{messages.map(function(m, index){
+							let direction = m.recipient === userId ? "right" : "left";
+							return <div key={index} className={"message " + direction}>{m.message}</div>
+						})}
 					</div>
-					
-				);
+					<textarea 
+						className="textInputs inputs" 
+						placeholder="Write a message" 
+						name="newMessage" 
+						rows="1" 
+						onChange={(e) => setNewMessage(e.target.value)} 
+						value={newMessage}></textarea>
+					<input 
+						type="submit" 
+						className="btn" 
+						value="Send" 
+						onClick={insertMessage} />
+				</div>
+			</div>	
+		)	
+	} else {
+		return (
+			<div className="conversations">
+				<h3>Select Contact</h3>
+			</div>
+		)		
 	}
 }
+
+// class Conversation extends Component {
+// 	constructor(){
+// 		super();
+// 		// this.socket = io();
+// 		this.state = {
+// 			newMessage: ""
+// 		};
+
+// 		this.handleChange = this.handleChange.bind(this);
+// 		this.insertMessage = this.insertMessage.bind(this);
+// 	}
+
+// 	componentDidUpdate() {
+// 		//show bottom of message div
+// 		let messagesDiv = document.getElementsByClassName('conversation');
+// 		if (messagesDiv.length > 0){
+// 			messagesDiv[0].scrollTop = messagesDiv[0].scrollHeight;
+// 		}
+// 	}
+
+// 	handleChange(event){
+// 		let {name, value} = event.target;
+// 		this.setState({[name]: value});
+// 	}
+
+// 	insertMessage(event){
+// 		event.preventDefault();
+// 		let data = {recipient: this.props.userId, message: this.state.newMessage, sender: getUserName()};
+// 		send("POST", "/api/messages", data, function(err, res) {
+// 			if(err) console.log(err);
+// 			else{
+// 				this.props.socket.emit("messagesUpdate", data);
+// 			}
+// 		}.bind(this));
+// 		this.setState({newMessage: ""});
+// 	}
+
+// 	render(){
+// 		let message = <h3>Select Contact</h3>;
+// 		let userId = this.props.userId;
+// 		if (userId != ""){
+// 			let messages = this.props.messages.map(function(m, index){
+// 				let direction = m.recipient === userId ? "right" : "left";
+// 				let currMessage = (
+// 						<div key={index} className={"message " + direction}>{m.message}</div>
+// 					);
+// 				return currMessage;
+// 			});
+
+// 			//display the messages and an input to send a new message
+// 			message = (
+// 					<div className="conversationContainer">
+// 						<div className="conversation">
+// 							{messages}
+// 						</div>
+// 						<textarea className="textInputs inputs" placeholder="Write a message" name="newMessage" rows="1" onChange={this.handleChange} value={this.state.newMessage}></textarea>
+// 						<input type="submit" className="btn" value="Send" onClick={this.insertMessage} />
+// 					</div>
+// 				);
+// 		}
+// 		return (
+// 					<div className="conversations">
+// 						{message}
+// 					</div>
+					
+// 				);
+// 	}
+// }
 
 export default Conversation;
