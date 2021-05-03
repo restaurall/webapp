@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import CategoryItem from './category';
-import OrderListItem from './orderListItem';
-import OrderTotal from './orderTotal';
+import CategoryItem from './components/category';
+import OrderListItem from './components/orderListItem';
+import OrderTotal from './components/orderTotal';
 import {send} from '../HelperFunctions';
 import Payment from './paymentPage';
 
@@ -18,7 +18,15 @@ const OrderListMenu = ({orderNumber, onEdit, incrementOrderNum, viewOrders}) => 
   const [orderList, setOrderList] = useState([]);
   //TODO: want nav instead of display state
   const [display, setDisplay] = useState('takeOrder');
-  const [orderNum, setOrderNum] = useState(orderNumber);
+  // initialize orderNum from data base
+  const [orderNum, setOrderNum] = useState(() => {
+		send("GET", "/api/orderNumber/", null, function(err, res) {
+			if(err) console.log(err);
+			else{
+        return res[0][Object.keys(res[0])[0]] + 1;
+			}
+		});
+  });
 
   // fetch category items from database
   const getCategoryItems = (category) => {

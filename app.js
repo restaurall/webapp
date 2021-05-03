@@ -149,12 +149,35 @@ app.post('/signup/', checkUsername, checkPassword, function (req, res, next) {
 
 });
 
-app.post('/signin/', checkUsername, checkPassword, function (req, res, next) {
+// Request for POS access
+app.post('/access-POS/', function(req, res) {
+	const key = req.body.key;
+	let query = 'SELECT company_name FROM access_keys WHERE BINARY access_key = ?';
+	connection.query(query, [key], function(err, result) {
+		if (err) {
+			return res.status(500).end(err.toString());
+		}
+		if (result.length === 0) {
+			console.log('Access denied')
+			return res.json(null);
+		}
+		const company = result[0].company_name
+		// initialize session and cookie for POS
+		req.session.company = company;
+		res.setHeader('Set-Cookie', cookie.serialize('company', company, {
+			path: '/',
+		}));
+		console.log('Access granted');
+		return res.json(company);
+	});
+})
+
+app.post('/signin/', checkUsername, checkPassword, function(req, res) {
     let username = req.body.username;
     let password = req.body.password;
 	
     let sql_search = "SELECT * FROM users WHERE username = ? "
-    connection.query(sql_search, [username], function (err, result, fields) {
+    connection.query(sql_search, [username], function(err, result) {
       	if (err) {
         	return res.status(500).end(err.toString());
       	}
@@ -181,7 +204,6 @@ app.post('/signin/', checkUsername, checkPassword, function (req, res, next) {
         	return res.status(401).end("Incorrect Username/Password");
       	}
     });
-
 });
 
 // removed authentication for signout for dev perposes

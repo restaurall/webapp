@@ -69,3 +69,8 @@ create table messages (
 	INDEX names_index (sender, recipient)
 );
 
+create table access_keys (
+	access_key varchar(50) NOT NULL,
+    primary key (access_key)
+);
+
