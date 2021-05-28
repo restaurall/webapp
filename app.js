@@ -75,6 +75,11 @@ app.use(session({
     saveUninitialized: true
 }));
 
+const isAuthPOS = function(req, res, next) {
+	if(!req.company) return res.status(401).end('Access denied');
+	next();
+};
+
 let isAuthenticated = function(req, res, next){
 	if(!req.username) return res.status(401).end("access denied");
     next();
@@ -108,6 +113,11 @@ let checkAction = function(req, res, next) {
 app.use(function (req, res, next){
     req.username = (req.session.username)? req.session.username : null;
     next();
+});
+
+app.use(function (req, res, next) {
+	req.company = req.session.company ? req.session.company : null;
+	next();
 });
 
 function generateSalt (){
@@ -242,30 +252,42 @@ function isEmptyObj(myObject) {
 }
 
 //gets menu items, pass category as query string, if no category provided, all menu items are returned
-app.get("/api/menuItems/", isAuthenticated, function(req, res){
-	let category = "";
-	let whereClause = "";
-	if(!isEmptyObj(req.query)){
-		category = req.query.category;
-		whereClause = " WHERE `category` = ?";
-	}
+// app.get("/api/menuItems/", isAuthenticated, function(req, res){
+// 	let category = "";
+// 	let whereClause = "";
+// 	if(!isEmptyObj(req.query)){
+// 		category = req.query.category;
+// 		whereClause = " WHERE `category` = ?";
+// 	}
 
-	let query = "SELECT * FROM `menu_items`" + whereClause;
-	connection.query(query, [category], function(error, result, fields){
-		if(error){
-			return res.status(500).end(error.toString());
-		}
-		else {
+// 	let query = "SELECT * FROM `menu_items`" + whereClause;
+// 	connection.query(query, [category], function(error, result, fields){
+// 		if(error){
+// 			return res.status(500).end(error.toString());
+// 		}
+// 		else {
+// 			return res.json(result);
+// 		}
+// 	});
+// });
+
+// Get all items on the menu
+app.get('/api/menuItems', isAuthPOS, function(req, res) {
+	const query = 'SELECT * FROM `menu_items`';
+	connection.query(query, function(error, result) {
+		if(error) {
+			return res.status(500).end(error.toString);
+		} else {
 			return res.json(result);
 		}
 	});
 });
 
-app.get("/api/categories/", isAuthenticated, function(req, res){
+app.get("/api/categories/", isAuthPOS, function(req, res){
 
 	let query = "SELECT * FROM `menu_categories`";
 
-	connection.query(query, function(error, result, fields){
+	connection.query(query, function(error, result){
 		if(error){
 			return res.status(500).end(error.toString());
 		}
@@ -275,7 +297,7 @@ app.get("/api/categories/", isAuthenticated, function(req, res){
 	});
 });
 
-app.post("/api/categories/", isAuthenticated, function(req, res){
+app.post("/api/categories/", isAuthPOS, function(req, res){
 
 	let query = "INSERT INTO menu_categories (category_name, color) values (?, ?)";
 	connection.query(query, [req.body.name, req.body.colour], function(err, result, fields){
@@ -288,7 +310,7 @@ app.post("/api/categories/", isAuthenticated, function(req, res){
 	});
 });
 
-app.get("/api/orders/:paid/", isAuthenticated, function(req, res){
+app.get("/api/orders/:paid/", isAuthPOS, function(req, res){
 	let query = "SELECT * FROM `orders` WHERE `payed` = " + req.params.paid;
 
 	connection.query(query, function(error, result, fields){
@@ -301,7 +323,7 @@ app.get("/api/orders/:paid/", isAuthenticated, function(req, res){
 	});
 });
 
-app.get("/api/orderItems/:orderNumber/", isAuthenticated, function(req, res){
+app.get("/api/orderItems/:orderNumber/", isAuthPOS, function(req, res){
 
 	let query = "SELECT * FROM `order_items` WHERE `order_number` = " + req.params.orderNumber;
 
@@ -315,7 +337,7 @@ app.get("/api/orderItems/:orderNumber/", isAuthenticated, function(req, res){
 	});
 });
 
-app.get("/api/orderNumber/", function(req, res){
+app.get("/api/orderNumber/", isAuthPOS, function(req, res){
 
 	let query = "SELECT max(order_number) FROM `orders`";
 
@@ -329,7 +351,7 @@ app.get("/api/orderNumber/", function(req, res){
 	});
 });
 
-app.post("/api/orders/", isAuthenticated, function(req, res){
+app.post("/api/orders/", isAuthPOS, function(req, res){
 
 	let query = "INSERT INTO orders (order_number, number_of_items, total, completed, payed) values (?, ?, ?, ?, ?)";
 	connection.query(query, [req.body.order_number, 
@@ -346,7 +368,7 @@ app.post("/api/orders/", isAuthenticated, function(req, res){
 	});
 });
 
-app.post("/api/orderItems/", isAuthenticated, function(req, res){
+app.post("/api/orderItems/", isAuthPOS, function(req, res){
 
 	let query = "INSERT INTO order_items (id, order_number, name, crossed, price, quantity) values (?, ?, ?, ?, ?, ?)";
 	connection.query(query, [req.body.id,
@@ -380,7 +402,7 @@ app.get("/api/users/", isAuthenticated, function(req, res){
 });
 
 //Insert menu item into the database
-app.post("/api/menuItems", isAuthenticated, function(req, res){
+app.post("/api/menuItems", isAuthPOS, function(req, res){
 
 	let query = "INSERT INTO menu_items (name, category, price) values (?, ?, ?)";
 	connection.query(query, [req.body.name, req.body.category, req.body.price], function(err, result, fields){
@@ -395,72 +417,72 @@ app.post("/api/menuItems", isAuthenticated, function(req, res){
 });
 
 //Update order total
-app.patch("/api/order/total/", isAuthenticated, function(req, res){
-	let query = "UPDATE `orders` SET `total` = ? WHERE `order_number` = ?;";
-	connection.query(query, [req.body.total, req.body.orderNumber], 
-		function(err, result, fields){
-		if(err) {
-			res.status(500).end(err.toString());
-		}
-		else {
-			res.json(result);
-		}
-	});
-});
+// app.patch("/api/order/total/", isAuthPOS, function(req, res){
+// 	let query = "UPDATE `orders` SET `total` = ? WHERE `order_number` = ?;";
+// 	connection.query(query, [req.body.total, req.body.orderNumber], 
+// 		function(err, result, fields){
+// 		if(err) {
+// 			res.status(500).end(err.toString());
+// 		}
+// 		else {
+// 			res.json(result);
+// 		}
+// 	});
+// });
 
 //Update order payed status
-app.patch("/api/order/payed/", isAuthenticated, function(req, res){
-	let query = "UPDATE `orders` SET `payed` = ? WHERE `order_number` = ?;";
-	connection.query(query, [req.body.payed, req.body.orderNumber], 
-		function(err, result, fields){
-		if(err) {
-			res.status(500).end(err.toString());
-		}
-		else {
-			res.json(result);
-		}
-	});
-});
+// app.patch("/api/order/payed/", isAuthPOS, function(req, res){
+// 	let query = "UPDATE `orders` SET `payed` = ? WHERE `order_number` = ?;";
+// 	connection.query(query, [req.body.payed, req.body.orderNumber], 
+// 		function(err, result, fields){
+// 		if(err) {
+// 			res.status(500).end(err.toString());
+// 		}
+// 		else {
+// 			res.json(result);
+// 		}
+// 	});
+// });
 
 //Update the completed status of an order
-app.patch("/api/order/status/complete/", isAuthenticated, function(req, res){
-	let query = "UPDATE `orders` SET `completed` = ? WHERE `order_number` = ?;";
-	connection.query(query, [req.body.completed, req.body.orderNumber], 
-		function(err, result, fields){
-		if(err) {
-			res.status(500).end(err.toString());
-		}
-		else {
-			res.json(result);
-		}
-	});
-});
+// app.patch("/api/order/status/complete/", isAuthenticated, function(req, res){
+// 	let query = "UPDATE `orders` SET `completed` = ? WHERE `order_number` = ?;";
+// 	connection.query(query, [req.body.completed, req.body.orderNumber], 
+// 		function(err, result, fields){
+// 		if(err) {
+// 			res.status(500).end(err.toString());
+// 		}
+// 		else {
+// 			res.json(result);
+// 		}
+// 	});
+// });
 
 // delete all items from an order from processing orders
-app.delete("/api/order/items/", isAuthenticated, function(req, res){
-	let query = "DELETE FROM `order_items` WHERE order_number = ?";
-	connection.query(query, [req.body.orderNumber], function(err, result, fields){
-		if(err) {
-			return res.status(500).end(err.toString());
-		}
-		else {
-			return res.json(result);
-		}
-	});
-});
+// app.delete("/api/order/items/", isAuthenticated, function(req, res){
+// 	let query = "DELETE FROM `order_items` WHERE order_number = ?";
+// 	connection.query(query, [req.body.orderNumber], function(err, result, fields){
+// 		if(err) {
+// 			return res.status(500).end(err.toString());
+// 		}
+// 		else {
+// 			return res.json(result);
+// 		}
+// 	});
+// });
 
 // delete an order from processing orders
-app.delete("/api/order/", isAuthenticated, function(req, res){
-	let query = "DELETE FROM `orders` WHERE `order_number` = ?";
-	connection.query(query, [req.body.orderNumber], function(err, result, fields){
-		if(err) {
-			return res.status(500).end(err.toString());
-		}
-		else {
-			return res.json(result);
-		}
-	});
-});
+// app.delete("/api/order/", isAuthenticated, function(req, res){
+// 	let query = "DELETE FROM `orders` WHERE `order_number` = ?";
+// 	connection.query(query, [req.body.orderNumber], function(err, result, fields){
+// 		if(err) {
+// 			return res.status(500).end(err.toString());
+// 		}
+// 		else {
+// 			return res.json(result);
+// 		}
+// 	});
+// });
 
 //Insert calendar into the database
 app.post("/api/calendars", isAuthenticated, function(req, res){

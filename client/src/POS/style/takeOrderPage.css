@@ -1,0 +1,219 @@
+.takeOrderContainer {
+	margin-top: 20px;
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	height: 500px;
+}
+
+/*
+======
+Item list
+======
+*/
+.takeOrderContainer .orderItems {
+	width: 30%;
+	height: 480px;
+	margin: 0px 80px 0px 20px;
+	border-radius: 5px;
+}
+
+.orderItems h2 {
+	margin: 10px;
+}
+
+.takeOrderContainer .itemList {
+	height: 60%;
+}
+
+.orderItems .item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 40px;
+}
+
+.orderItems .item .price {
+	margin: 0px;
+	width: 45px;
+	text-align: left;
+}
+
+.orderItems .itemName {
+	display: flex;
+	align-items: center;
+	margin: 0px;
+	height: 30px;
+	width: 200px;
+	font-size: 18px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.orderItems .removeItemButton {
+	background-color: transparent;
+	border: None;
+	outline: None;
+	color: red;
+	font-weight: bold;
+	font-size: 20px;
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+.orderItems .removeItemButton:hover {opacity: 1;}
+
+.itemList .decrementBtn {
+	width: 30px;
+	background-color: transparent;
+	border: None;
+	outline: None;
+	color: rgb(230, 0, 0);
+	font-weight: bold;
+	font-size: 25px;
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+.orderItems .decrementBtn:hover {opacity: 1;}
+
+.itemList .incrementBtn {
+	width: 30px;
+	background-color: transparent;
+	border: None;
+	outline: None;
+	color: green;
+	font-weight: bold;
+	font-size: 20px;
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+.orderItems .incrementBtn:hover {opacity: 1;}
+
+.orderItems .inputQty {
+	text-align: center;
+	width: 20px;
+	height: 20px;
+	margin-top: 5px;
+}
+
+.paymentItemsHeader .itemQty {
+	flex: 0.5;
+}
+
+.paymentItemsHeader .itemName {
+	flex: 3;
+}
+
+.orderItems .itemPrice {
+	flex: 1;
+}
+
+.orderItems .orderTotal {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.finishOrderBtn {
+	width: 48%;
+	font-size: 25px;
+	font-weight: bold;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	margin-top: 25px;
+	margin-bottom: 5px;
+}
+
+.finishOrderBtn:disabled {
+	pointer-events: none;
+	opacity: 60%;
+}
+
+.placeOrderBtn {
+	background-color: rgb(102, 212, 102);
+	color: rgb(0, 63, 0);
+}
+
+.placeOrderBtn:hover {
+	background-color: rgb(54, 190, 54);
+}
+
+.cancelOrderBtn {
+	background-color:rgb(252, 72, 72);
+	color:rgb(87, 5, 5);
+	margin-right: 4%;
+}
+
+.cancelOrderBtn:hover {
+	background-color: rgb(241, 47, 47);
+}
+
+/*
+======
+Menu
+======
+*/
+.menu .items {
+	width: 90%;
+	height: 59%;
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+}
+
+.orderListMenu .menu {
+	display: flex;
+	flex-direction: column;
+	width: 60%;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.menu .categories {
+	position: relative;
+	display: flex;
+	width: 710px;
+	height: 50px;
+	font-weight: bold;
+	margin-bottom: 10px;
+	justify-content: center;
+}
+
+.menu .category {
+	height: 100%;
+	width: 20%;	
+	text-transform: uppercase;
+	text-align: center;
+	cursor: pointer;
+	background-color: transparent;
+	border: none;
+	font-size: 18px;
+	border-bottom-style: solid;
+	outline-style: none;
+}
+
+#categoryHoverBar {
+	position: absolute;
+	width: 142px;
+	height: 0px;
+	border-bottom-style: solid;
+	opacity: 0;
+	transition-duration: 0.3s;
+	z-index: 2;
+}
+
+.menu .menuItem {
+	height: 25%;
+	width: 150px;
+	font-size: 18px;
+	opacity: 0.88;
+	cursor: pointer;
+	margin: 10px 0px 10px 0px;
+}
+
+.menu .items .itemBtn:hover {opacity: 1;}
+

@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import '../style/nav.css';
 import {getUserName} from '../HelperFunctions'
 import {send} from '../HelperFunctions'
 

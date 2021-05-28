@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {send} from '../HelperFunctions';
 
-const Payment = ({items, total, orderNumber, viewOrders, displayTakeOrder}) => {
+const PaymentPage = ({items, total, orderNumber, viewOrders, displayTakeOrder}) => {
 
   const [payment, setPayment] = useState(0);
 
@@ -23,7 +23,7 @@ const Payment = ({items, total, orderNumber, viewOrders, displayTakeOrder}) => {
   }
   
   return(
-    <div>
+    <main>
       <div className="orderMenuTitles">
         <h1 id="order_list_title"> Order #{orderNumber} </h1>
       </div>
@@ -82,8 +82,8 @@ const Payment = ({items, total, orderNumber, viewOrders, displayTakeOrder}) => {
               id="cancel">CANCEL</button>
         </div>
       </div>
-    </div>
+    </main>
   )  
 }
 
-export default Payment;
+export default PaymentPage;

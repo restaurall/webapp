@@ -1,28 +1,29 @@
-import React from 'react';
-import shortid from 'shortid';
+import React, { useRef , useEffect } from 'react';
+import { usePOSContext } from '../POSContext';
 
-const CategoryItem = ({addItem, itemName, price, color}) => {
+const Category = ({name, setPosition}) => {
+
+    const { setSelectedCtg, selectedCtg} = usePOSContext();
+    const categoryRef = useRef(null);
+
+    useEffect(() => {
+        selectedCtg === name ?
+            categoryRef.current.style.borderColor = 'black' :
+            categoryRef.current.style.borderColor = 'rgb(221, 221, 221)';
+    }, [selectedCtg]);
 
     return (
         <button 
-            name={itemName} 
             type="button" 
-            value={price}
-            className="itemBtn" 
-            onClick={(e) => {
-                addItem({
-                    id: shortid.generate() ,
-                    name: e.target.name,
-                    crossed: false,
-                    price: e.target.value,
-                    quantity: 1                   
-                });
-            }}
-            style={{"backgroundColor": color}}
-        >
-            {itemName}
-        </button>            
-    );
+            className="category" 
+            ref={categoryRef}
+            onClick={() => setSelectedCtg(name)}
+            onMouseOver={() => setPosition({
+                x: categoryRef.current.getBoundingClientRect().left,
+                y: categoryRef.current.getBoundingClientRect().bottom - 3})}>
+            {name}
+        </button>
+    )
 }
 
-export default CategoryItem;
+export default Category;
